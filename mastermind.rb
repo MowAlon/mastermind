@@ -17,7 +17,7 @@ def instructions
 end
 
 def game_intro
-  "\nI have generated a beginner sequence with four elements made up of:\n(r)ed, (g)reen, (b)lue, and (y)ellow.\nUse (q)uit at any time to end the game.\nWhat's your guess?\n"
+  "\nI have generated a beginner sequence with four elements made up of:\n(r)ed, (g)reen, (b)lue, and (y)ellow.\nUse (q)uit at any time to end the game.\n\nWhat's your guess?\n"
 end
 
 def set_game_parameters
@@ -31,23 +31,22 @@ end
 
 def game
   set_game_parameters
-p "Debug: #{@answer}"
+# p "Debug: #{@answer}"
   puts game_intro
   @guess = gets.chomp.downcase.chars
   @guess_count += 1
 
-  while @guess != 'q' && @guess != @answer
+  while @guess != ['q'] && @guess != @answer
     respond_to_invalid_guess if @guess != 'q'
     puts hint
 
     print "Another guess? or (q)uit >>> "
     @guess = gets.chomp.downcase.chars
-    @guess = "q" if @guess = ["q"]
     @guess_count += 1
   end
 
   end_game if @guess == @answer
-  puts "Sorry to see you go, but thanks for playing!"
+  puts "\nSorry to see you go, but thanks for playing!"
   abort
 end
 
@@ -56,25 +55,25 @@ def hint
 end
 
 def correct_elements
-  # count = 0
-  # guess_group = @guess.group_by{|color| color}
-  # answer_group = @answer.group_by{|color| color}
-  # @guess.each do |element|
-  #   if !@answer[element].nil?
-  #     count += guess_group[element].size if guess_group[element].size <= answer_group[element].size
-  #     count += answer_group[element].size if guess_group[element].size > answer_group[element].size
-  #   end
-  # end
-  # count
-  "X"
+  total = 0
+  guesses = @guess.group_by{|color| color}
+  guesses.each{|k,v| guesses[k] = v.size}
+  answers = @answer.group_by{|color| color}
+  answers.each{|k,v| answers[k] = v.size}
+  guesses.each do |color, guess_count|
+    if !answers[color].nil?
+      total += guess_count <= answers[color] ? guess_count : answers[color]
+    end
+  end
+  total
 end
 
 def correct_positions
-  count = 0
+  total = 0
   @game_size.times do |index|
-    count += 1 if @guess[index] == @answer[index]
+    total += 1 if @guess[index] == @answer[index]
   end
-  count
+  total
 end
 
 def end_game
@@ -98,7 +97,7 @@ end
 def respond_to_invalid_guess
   if @guess.length != @game_size
     puts "😱  I'm looking for #{@game_size} characters."
-    if guess.length < @game_size
+    if @guess.length < @game_size
       puts "Your guess was too short."
     else
       puts "Your guess was too long."
